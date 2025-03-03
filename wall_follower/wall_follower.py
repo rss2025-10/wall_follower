@@ -31,7 +31,7 @@ class WallFollower(Node):
         # DO NOT MODIFY THIS! This is necessary for the tests to be able to test varying parameters!
         self.SCAN_TOPIC = self.get_parameter('scan_topic').get_parameter_value().string_value
         self.DRIVE_TOPIC = self.get_parameter('drive_topic').get_parameter_value().string_value
-        self.SIDE = self.get_parameter('side').get_parameter_value().integer_value
+        self.SIDE = -1
         self.VELOCITY = self.get_parameter('velocity').get_parameter_value().double_value
         self.DESIRED_DISTANCE = self.get_parameter('desired_distance').get_parameter_value().double_value
         self.SAFETY_TOPIC = self.get_parameter("safety_topic").get_parameter_value().string_value
@@ -44,15 +44,14 @@ class WallFollower(Node):
         self.most_recent_theta = 0
         self.add_on_set_parameters_callback(self.parameters_callback)
 
-        # TODO: Initialize your publishers and subscribers here
         self.drive_publisher = self.create_publisher(SafeDriveMsg, self.SAFETY_TOPIC, 10)
         self.lidar_subscription = self.create_subscription(LaserScan, self.SCAN_TOPIC, self.laser_scan_callback, 10)
         self.lidar_subscription
         self.line_pub = self.create_publisher(Marker, "/wall", 1)
         self.drive_msg = None
 
-    # TODO: Write your callback functions here
-    def send_drive_command(self, steering_angle, line_msg):
+
+    def send_drive_command(self, steering_angle, scan_msg):
         """Sends a drive command based on the input steering angle. No
         other params are changed."""
         safe_drive_msg = SafeDriveMsg()
@@ -69,7 +68,7 @@ class WallFollower(Node):
         drive.speed = self.VELOCITY
         self.drive_msg.drive = drive
         safe_drive_msg.drive_msg = self.drive_msg
-        safe_drive_msg.line = line_msg
+        safe_drive_msg.scan = scan_msg
 
         self.drive_publisher.publish(safe_drive_msg)
 
@@ -98,10 +97,8 @@ class WallFollower(Node):
         else:
                 theta_command = -kp_gains*(abs(dist_to_wall) - self.DESIRED_DISTANCE) + kd_gains*(slope)
 
-        line_msg = Float64MultiArray()
-        line_msg.data = [slope, y_int]
         # Send drive
-        self.send_drive_command(theta_command, line_msg)
+        self.send_drive_command(theta_command, msg)
         self.most_recent_time = msg.header.stamp.nanosec
 
 
@@ -127,6 +124,7 @@ class WallFollower(Node):
                 y.append(edited_ranges[k]*np.sin(angle_min + increment*k))
 
         return np.polyfit(x, y, 1)
+
 
     def parameters_callback(self, params):
         """
