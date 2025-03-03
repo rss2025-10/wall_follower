@@ -44,14 +44,13 @@ class WallFollower(Node):
         self.most_recent_theta = 0
         self.add_on_set_parameters_callback(self.parameters_callback)
 
-        # TODO: Initialize your publishers and subscribers here
         self.drive_publisher = self.create_publisher(SafeDriveMsg, self.SAFETY_TOPIC, 10)
         self.lidar_subscription = self.create_subscription(LaserScan, self.SCAN_TOPIC, self.laser_scan_callback, 10)
         self.lidar_subscription
         self.line_pub = self.create_publisher(Marker, "/wall", 1)
         self.drive_msg = None
 
-    # TODO: Write your callback functions here
+
     def send_drive_command(self, steering_angle, scan_msg):
         """Sends a drive command based on the input steering angle. No
         other params are changed."""
@@ -72,6 +71,7 @@ class WallFollower(Node):
         safe_drive_msg.scan = scan_msg
 
         self.drive_publisher.publish(safe_drive_msg)
+
 
     def laser_scan_callback(self, msg):
         """Laser scan callback."""
@@ -124,6 +124,7 @@ class WallFollower(Node):
                 y.append(edited_ranges[k]*np.sin(angle_min + increment*k))
 
         return np.polyfit(x, y, 1)
+
 
     def parameters_callback(self, params):
         """
