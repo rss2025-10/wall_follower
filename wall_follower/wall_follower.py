@@ -20,18 +20,18 @@ class WallFollower(Node):
         super().__init__("wall_follower")
         # Declare parameters to make them available for use
         # DO NOT MODIFY THIS!
-        self.declare_parameter("scan_topic", "default")
-        self.declare_parameter("drive_topic", "default")
-        self.declare_parameter("side", 0)
+        self.declare_parameter("scan_topic", "default_scan")
+        self.declare_parameter("drive_topic", "default_drive")
+        self.declare_parameter("side", -1)
         self.declare_parameter("velocity", 0.0)
         self.declare_parameter("desired_distance", 0.0)
-        self.declare_parameter("safety_topic", "/safety_topic")
+        self.declare_parameter("safety_topic", "default_safety")
 
         # Fetch constants from the ROS parameter server
         # DO NOT MODIFY THIS! This is necessary for the tests to be able to test varying parameters!
         self.SCAN_TOPIC = self.get_parameter('scan_topic').get_parameter_value().string_value
         self.DRIVE_TOPIC = self.get_parameter('drive_topic').get_parameter_value().string_value
-        self.SIDE = -1
+        self.SIDE = self.get_parameter('side').get_parameter_value().integer_value
         self.VELOCITY = self.get_parameter('velocity').get_parameter_value().double_value
         self.DESIRED_DISTANCE = self.get_parameter('desired_distance').get_parameter_value().double_value
         self.SAFETY_TOPIC = self.get_parameter("safety_topic").get_parameter_value().string_value

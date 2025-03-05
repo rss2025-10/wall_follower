@@ -1,0 +1,16 @@
+wall_follower:
+  ros__parameters:
+    side: 1
+    scan_topic: "/scan"
+    drive_topic: "/drive"
+    safety_topic: "/safety"
+    velocity: 1.0
+    desired_distance: 1.
+
+safety_controller:
+  ros__parameters:
+    side: 1
+    drive_topic: "/drive"
+    safety_topic: "/safety"
+    velocity: 1.0
+    desired_distance: 1.

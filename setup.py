@@ -11,6 +11,7 @@ setup(
     packages=find_packages(exclude=['test']),
     data_files=[
         ('share/'+package_name, ['package.xml', "wall_follower/params.yaml"]),
+        ('share/'+package_name, ['package.xml', "wall_follower/safety_params.yaml"]),
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/wall_follower/launch', glob.glob(os.path.join('launch', '*launch.xml'))),
