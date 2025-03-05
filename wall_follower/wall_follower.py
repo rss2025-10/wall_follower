@@ -31,6 +31,7 @@ class WallFollower(Node):
         # DO NOT MODIFY THIS! This is necessary for the tests to be able to test varying parameters!
         self.SCAN_TOPIC = self.get_parameter('scan_topic').get_parameter_value().string_value
         self.DRIVE_TOPIC = self.get_parameter('drive_topic').get_parameter_value().string_value
+        self.get_logger().info("DRIVE_TOPIC: " + self.DRIVE_TOPIC)
         self.SIDE = -1
         self.VELOCITY = self.get_parameter('velocity').get_parameter_value().double_value
         self.DESIRED_DISTANCE = self.get_parameter('desired_distance').get_parameter_value().double_value
@@ -44,7 +45,7 @@ class WallFollower(Node):
         self.most_recent_theta = 0
         self.add_on_set_parameters_callback(self.parameters_callback)
 
-        self.drive_publisher = self.create_publisher(SafeDriveMsg, self.SAFETY_TOPIC, 10)
+        self.drive_publisher = self.create_publisher(AckermannDriveStamped, self.DRIVE_TOPIC, 10)
         self.lidar_subscription = self.create_subscription(LaserScan, self.SCAN_TOPIC, self.laser_scan_callback, 10)
         self.lidar_subscription
         self.line_pub = self.create_publisher(Marker, "/wall", 1)
@@ -54,7 +55,6 @@ class WallFollower(Node):
     def send_drive_command(self, steering_angle, scan_msg):
         """Sends a drive command based on the input steering angle. No
         other params are changed."""
-        safe_drive_msg = SafeDriveMsg()
         self.drive_msg = AckermannDriveStamped()
 
         header = Header()
@@ -67,10 +67,10 @@ class WallFollower(Node):
 
         drive.speed = self.VELOCITY
         self.drive_msg.drive = drive
-        safe_drive_msg.drive_msg = self.drive_msg
-        safe_drive_msg.scan = scan_msg
+        # safe_drive_msg.drive_msg = self.drive_msg
+        # safe_drive_msg.scan = scan_msg
 
-        self.drive_publisher.publish(safe_drive_msg)
+        self.drive_publisher.publish(self.drive_msg)
 
 
     def laser_scan_callback(self, msg):
