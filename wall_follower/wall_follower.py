@@ -107,7 +107,7 @@ class WallFollower(Node):
 
         edited_ranges = [ranges[k] if ranges[k] < 9 else None for k in range(num_samples)]
         if self.SIDE == -1:
-            rng = range(num_samples // 6, 4* num_samples // 6)
+            rng = range(num_samples // 6, num_samples // 2)
         else:
             rng = range(num_samples//2,  5*num_samples//6)
 
