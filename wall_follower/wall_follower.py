@@ -50,6 +50,9 @@ class WallFollower(Node):
         self.line_pub = self.create_publisher(Marker, "/wall", 1)
         self.drive_msg = None
 
+        self.dist_sum = 0
+        self.ticks = 0
+
 
     def send_drive_command(self, steering_angle, scan_msg):
         """Sends a drive command based on the input steering angle. No
@@ -91,6 +94,10 @@ class WallFollower(Node):
 
             # Googled this error function
         dist_to_wall = abs(y_int)/np.sqrt(slope**2 + 1)
+        self.dist_sum += dist_to_wall
+        self.ticks += 1
+
+        self.get_logger().info(f"Average distance from wall: {self.dist_sum/self.ticks}")
 
         if self.SIDE == 1:
                 theta_command = kp_gains*(abs(dist_to_wall) - self.DESIRED_DISTANCE) + kd_gains*(slope)
