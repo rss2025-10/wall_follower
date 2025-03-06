@@ -32,7 +32,7 @@ class WallFollower(Node):
         self.SCAN_TOPIC = self.get_parameter('scan_topic').get_parameter_value().string_value
         self.DRIVE_TOPIC = self.get_parameter('drive_topic').get_parameter_value().string_value
         self.get_logger().info("DRIVE_TOPIC: " + self.DRIVE_TOPIC)
-        self.SIDE = -1
+        self.SIDE = self.get_parameter("side").get_parameter_value().integer_value
         self.VELOCITY = self.get_parameter('velocity').get_parameter_value().double_value
         self.DESIRED_DISTANCE = self.get_parameter('desired_distance').get_parameter_value().double_value
         self.SAFETY_TOPIC = self.get_parameter("safety_topic").get_parameter_value().string_value
@@ -91,6 +91,9 @@ class WallFollower(Node):
 
             # Googled this error function
         dist_to_wall = abs(y_int)/np.sqrt(slope**2 + 1)
+        # self.get_logger().info("dist_to_wall: " + str(dist_to_wall))
+        self.get_logger().info("line: " + str(line))
+
 
         if self.SIDE == 1:
                 theta_command = kp_gains*(abs(dist_to_wall) - self.DESIRED_DISTANCE) + kd_gains*(slope)
@@ -99,6 +102,7 @@ class WallFollower(Node):
 
         # Send drive
         self.send_drive_command(theta_command, msg)
+        self.get_logger().info("theta_command: " + str(theta_command))
         self.most_recent_time = msg.header.stamp.nanosec
 
 
@@ -114,7 +118,7 @@ class WallFollower(Node):
         if self.SIDE == -1:
             rng = range(num_samples // 6, num_samples // 2)
         else:
-            rng = range(num_samples//2,  5*num_samples//6)
+            rng = range(num_samples//2, 5* num_samples//6)
 
         x = []
         y = []
