@@ -33,6 +33,7 @@ class WallFollower(Node):
         self.DRIVE_TOPIC = self.get_parameter('drive_topic').get_parameter_value().string_value
         self.get_logger().info("DRIVE_TOPIC: " + self.DRIVE_TOPIC)
         self.SIDE = self.get_parameter("side").get_parameter_value().integer_value
+        self.get_logger().info("SIDE: " + str(self.SIDE))
         self.VELOCITY = self.get_parameter('velocity').get_parameter_value().double_value
         self.DESIRED_DISTANCE = self.get_parameter('desired_distance').get_parameter_value().double_value
         self.SAFETY_TOPIC = self.get_parameter("safety_topic").get_parameter_value().string_value
@@ -50,7 +51,10 @@ class WallFollower(Node):
         self.lidar_subscription
         self.line_pub = self.create_publisher(Marker, "/wall", 1)
         self.drive_msg = None
-
+        self.dist_sum = 0
+        self.ticks = 0
+        self.datapoints = [[],[]]
+        self.start_time = self.get_clock().now().to_msg().sec + self.get_clock().now().nanoseconds*1e-9
 
     def send_drive_command(self, steering_angle, scan_msg):
         """Sends a drive command based on the input steering angle. No
@@ -91,8 +95,11 @@ class WallFollower(Node):
 
             # Googled this error function
         dist_to_wall = abs(y_int)/np.sqrt(slope**2 + 1)
-        # self.get_logger().info("dist_to_wall: " + str(dist_to_wall))
-        self.get_logger().info("line: " + str(line))
+        self.dist_sum += dist_to_wall
+        self.ticks += 1
+        if self.ticks % 5 == 0:
+            self.datapoints[0].append((self.get_clock().now().to_msg().sec + self.get_clock().now().to_msg().nanosec*1e-9))
+            self.datapoints[1].append(self.dist_sum/self.ticks)
 
 
         if self.SIDE == 1:
@@ -102,7 +109,6 @@ class WallFollower(Node):
 
         # Send drive
         self.send_drive_command(theta_command, msg)
-        self.get_logger().info("theta_command: " + str(theta_command))
         self.most_recent_time = msg.header.stamp.nanosec
 
 
@@ -153,7 +159,10 @@ class WallFollower(Node):
 def main():
     rclpy.init()
     wall_follower = WallFollower()
-    rclpy.spin(wall_follower)
+    try:
+        rclpy.spin(wall_follower)
+    except KeyboardInterrupt:
+        wall_follower.get_logger().info(f"{wall_follower.datapoints}")
     wall_follower.destroy_node()
     rclpy.shutdown()
 
